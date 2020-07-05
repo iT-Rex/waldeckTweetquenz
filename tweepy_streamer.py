@@ -2,12 +2,14 @@ from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 
+import json
 import twitter_credentials
 
 class StdOutListener(StreamListener):
 
 	def on_data(self, data):
-		print(data)
+		jsonData = json.loads(data)
+		print(jsonData['text'])
 		return True
 
 	def on_error(self, status):
