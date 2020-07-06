@@ -5,6 +5,10 @@ from tweepy import Stream
 import json
 import twitter_credentials
 
+class TweetTextFormatter():
+	def getFormattedPrintText(self, tweetText):
+		return tweetText
+
 class TwitterStreamer():
 	def stream_tweets(self, hash_tag_list):
 		listener = StdOutListener()
@@ -15,10 +19,15 @@ class TwitterStreamer():
 		stream.filter(track = hash_tag_list)
 
 class StdOutListener(StreamListener):
-
 	def on_data(self, data):
 		jsonData = json.loads(data)
-		print(jsonData['text'])
+		tweetText = jsonData['text']
+
+		tweetTextFormatter = TweetTextFormatter()
+		printText = tweetTextFormatter.getFormattedPrintText(tweetText)
+
+		print(printText)
+
 		return True
 
 	def on_error(self, status):
@@ -26,6 +35,6 @@ class StdOutListener(StreamListener):
 
 if __name__ == "__main__":
 	hash_tag_list = ['nintendo']
-	
+
 	twitterStreamer = TwitterStreamer()
 	twitterStreamer.stream_tweets(hash_tag_list)
