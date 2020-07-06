@@ -4,10 +4,7 @@ from tweepy import Stream
 
 import json
 import twitter_credentials
-
-class TweetTextFormatter():
-	def getFormattedPrintText(self, tweetText):
-		return tweetText
+import TweetTextFormatter
 
 class TwitterStreamer():
 	def stream_tweets(self, hash_tag_list):
@@ -23,7 +20,7 @@ class StdOutListener(StreamListener):
 		jsonData = json.loads(data)
 		tweetText = jsonData['text']
 
-		tweetTextFormatter = TweetTextFormatter()
+		tweetTextFormatter = TweetTextFormatter.TweetTextFormatter()
 		printText = tweetTextFormatter.getFormattedPrintText(tweetText)
 
 		print(printText)
