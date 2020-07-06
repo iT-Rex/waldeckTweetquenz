@@ -23,7 +23,8 @@ class StdOutListener(StreamListener):
     tweetTextFormatter = TweetTextFormatter.TweetTextFormatter()
     printText = tweetTextFormatter.getFormattedPrintText(tweetText)
 
-    print(printText)
+    for line in printText:
+      print(line)
 
     return True
 
