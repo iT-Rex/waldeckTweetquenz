@@ -5,6 +5,7 @@ from tweepy import Stream
 import json
 import twitter_credentials
 import TweetTextFormatter
+import os
 
 class TwitterStreamer():
   def stream_tweets(self, hash_tag_list):
@@ -24,7 +25,8 @@ class StdOutListener(StreamListener):
     printText = tweetTextFormatter.getFormattedPrintText(tweetText)
 
     for line in printText:
-      print(line)
+      printLineCommand = 'printf "\x1bW1\x1bx1' + line + '\r"> /dev/lp0'
+      os.system(printLineCommand)
 
     return True
 
