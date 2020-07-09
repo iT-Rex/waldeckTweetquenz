@@ -19,6 +19,7 @@
     <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="PrintCommandSender.py" />
     <Compile Include="tweepy_streamer.py" />
     <Compile Include="TweetTextFormatter.py" />
     <Compile Include="twitter_credentials.py" />
