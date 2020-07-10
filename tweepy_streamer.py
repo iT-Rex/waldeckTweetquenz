@@ -34,7 +34,7 @@ class StdOutListener(StreamListener):
     print(status)
 
 if __name__ == "__main__":
-  hash_tag_list = ['nintendo']
+  hash_tag_list = ['@BurgWaldeck','#waldeckfreakquenz','@WFreakquenz','#digitalfreakquenz','freakquenz']
 
   twitterStreamer = TwitterStreamer()
   twitterStreamer.stream_tweets(hash_tag_list)
