@@ -25,7 +25,9 @@ class StdOutListener(StreamListener):
     printText = tweetTextFormatter.getFormattedPrintText(tweetText)
     printCommandSender = PrintCommandSender.PrintCommandSender()
 
-    printCommandSender.setPrinterCharacterMode()
+    with open("/dev/lp0", "w") as printer:
+      printer.write("\x1bW1\x1bx1")
+
     for line in printText:
       printCommandSender.sendPrintLineToConsole(line)
     
