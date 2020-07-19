@@ -29,7 +29,7 @@ class StdOutListener(StreamListener):
     for line in printText:
       printCommandSender.sendPrintLineToConsole(line)
     
-    line = "\n\n\n\n\n\n"
+    line = "\n\n\n\n"
     printCommandSender.sendPrintLineToConsole(line)
     return True
 
