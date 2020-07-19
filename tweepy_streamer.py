@@ -21,8 +21,7 @@ class StdOutListener(StreamListener):
     jsonData = json.loads(data)
     tweetText = jsonData['text']
 
-    tweetTextFormatter = TweetTextFormatter.TweetTextFormatter()
-    printText = tweetTextFormatter.getFormattedPrintText(tweetText)
+    printText = TweetTextFormatter.chop(tweetText)
     printCommandSender = PrintCommandSender.PrintCommandSender()
 
     with open("/dev/lp0", "w") as printer:
