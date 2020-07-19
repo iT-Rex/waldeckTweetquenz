@@ -4,8 +4,8 @@ from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 
-import PrintCommandSender
 import twitter_credentials
+from printer import Printer
 from utils import reflow
 
 
@@ -23,16 +23,11 @@ class StdOutListener(StreamListener):
     jsonData = json.loads(data)
     tweetText = jsonData['text']
 
-    printCommandSender = PrintCommandSender.PrintCommandSender()
-
-    with open("/dev/lp0", "w") as printer:
-      printer.write("\x1bW1\x1bx1")
-
+    printer = Printer()
     for line in reflow(tweetText):
-      printCommandSender.sendPrintLineToConsole(line)
+      printer.print(line)
+    printer.separator()
 
-    line = "\n\n\n\n"
-    printCommandSender.sendPrintLineToConsole(line)
     return True
 
   def on_error(self, status):
