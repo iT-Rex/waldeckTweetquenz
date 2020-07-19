@@ -9,3 +9,4 @@ class PrintCommandSender():
       printer.write(line)
       printer.write("\r")
       printer.write(line)
+      printer.write("\n")
