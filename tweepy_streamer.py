@@ -28,6 +28,8 @@ class StdOutListener(StreamListener):
     for line in printText:
       printCommandSender.sendPrintLineToConsole(line)
     
+    line = "\n\n\n\n\n\n"
+    printCommandSender.sendPrintLineToConsole(line)
     return True
 
   def on_error(self, status):
