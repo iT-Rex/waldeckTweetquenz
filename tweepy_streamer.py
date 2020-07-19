@@ -1,11 +1,13 @@
+import json
+
 from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 
-import json
-import twitter_credentials
-import TweetTextFormatter
 import PrintCommandSender
+import twitter_credentials
+from utils import reflow
+
 
 class TwitterStreamer():
   def stream_tweets(self, hash_tag_list):
@@ -21,15 +23,14 @@ class StdOutListener(StreamListener):
     jsonData = json.loads(data)
     tweetText = jsonData['text']
 
-    printText = TweetTextFormatter.chop(tweetText)
     printCommandSender = PrintCommandSender.PrintCommandSender()
 
     with open("/dev/lp0", "w") as printer:
       printer.write("\x1bW1\x1bx1")
 
-    for line in printText:
+    for line in reflow(tweetText):
       printCommandSender.sendPrintLineToConsole(line)
-    
+
     line = "\n\n\n\n"
     printCommandSender.sendPrintLineToConsole(line)
     return True
