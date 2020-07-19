@@ -6,3 +6,6 @@ class PrintCommandSender():
       printer.write("\x1bW1\x1bx1")
       printer.write(line)
       printer.write("\r")
+      printer.write(line)
+      printer.write("\r")
+      printer.write(line)
