@@ -1,21 +1,13 @@
+from math import ceil
+
 class TweetTextFormatter():
-  def chopUpIntoThirtyCharacterLines(self, tweetText):
-    characterCountLeftToParse = len(tweetText)
-    desiredLineLength = 30
-    nextLineEnd = desiredLineLength
-    nextLineStart = 0
-    choppedUpLines = list()
-    
-    while characterCountLeftToParse > desiredLineLength:
-      choppedUpLines.append(tweetText[nextLineStart:nextLineEnd])
-      characterCountLeftToParse = characterCountLeftToParse - desiredLineLength
-      nextLineStart = nextLineEnd
-      nextLineEnd = nextLineStart + desiredLineLength
-
-    choppedUpLines.append(tweetText[nextLineStart:nextLineStart + characterCountLeftToParse])
-
-    return choppedUpLines
+  def chop(text, line_length=30):
+    for paragraph in text.split("\n"):
+      for line in range(ceil(len(paragraph) / line_length)):
+        start = line * 30
+        end = start + line_length
+        yield paragraph[start:end]
 
   def getFormattedPrintText(self, tweetText):
-    formattedPrintText = self.chopUpIntoThirtyCharacterLines(tweetText)
+    formattedPrintText = self.chop(tweetText)
     return formattedPrintText
