@@ -25,6 +25,7 @@ class StdOutListener(StreamListener):
     printText = tweetTextFormatter.getFormattedPrintText(tweetText)
     printCommandSender = PrintCommandSender.PrintCommandSender()
 
+    printCommandSender.setPrinterCharacterMode()
     for line in printText:
       printCommandSender.sendPrintLineToConsole(line)
     
