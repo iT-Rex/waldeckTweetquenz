@@ -7,8 +7,4 @@ class PrintCommandSender():
 
   def sendPrintLineToConsole(self, line):
     with open("/dev/lp0", "w") as printer:
-      printer.write(line)
-      printer.write("\r")
-      printer.write(line)
-      printer.write("\r")
-      printer.write("\n")
+      printer.write(line + chr(13) + line)
