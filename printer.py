@@ -1,30 +1,43 @@
 from itertools import repeat
 
+from utils import character_encoder
+
 
 class Printer:
-    WIDE_MODE = "\x1bW{width}"
-    QUALITY_MODE = "\x1bx{quality}"
+    WIDE_MODE = b"\x1bW%d"
+    QUALITY_MODE = b"\x1bx%d"
 
-    def __init__(self, device="/dev/lp0", width=1, quality=1):
+    def __init__(
+        self,
+        device: str = "/dev/lp0",
+        width: int = 1,
+        quality: int = 1,
+        encoding: str = "cp850",
+    ):
         self.device = device
-        self._send(self.WIDE_MODE.format(width=width))
-        self._send(self.QUALITY_MODE.format(quality=quality))
+        self.encoding = encoding
+        self._write(self.WIDE_MODE % width)
+        self._write(self.QUALITY_MODE % quality)
 
-    def print(self, line, weight=2):
+    def print(self, text: str, weight: int = 2) -> None:
         """Takes an input string and prints it, terminating with a newline.
 
         This also implements a printing `weight` that's achieved using a simple
         carriage return and reprint. For this to work, the given line must not
         contain its own newlines.
         """
-        for data in repeat(line, weight):
-            self._send(data + "\r")
-        self._send("\n")
+        for data in repeat(self._encoder(text + "\r"), weight):
+            self._write(data)
+        self._write(b"\n")
 
-    def separator(self):
+    def separator(self) -> None:
         """Generates a big blank separator between printed blocks."""
-        self._send("\n" * 6)
+        self._write(b"\n" * 6)
 
-    def _send(self, raw):
-        with open(self.device, "w") as fp:
+    def _encoder(self, text: str) -> bytes:
+        encoder = character_encoder(self.encoding)
+        return b"".join(map(encoder, text))
+
+    def _write(self, raw: bytes) -> None:
+        with open(self.device, "wb") as fp:
             fp.write(raw)
