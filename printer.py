@@ -1,3 +1,5 @@
+from typing import BinaryIO
+
 from utils import character_encoder
 
 
@@ -9,13 +11,13 @@ class Printer:
 
     def __init__(
         self,
-        device: str = "/dev/lp0",
+        device: BinaryIO,
         width: int = 1,
         high_quality: bool = True,
         encoding: str = "cp850",
     ):
         self.device = device
-        self.encoding = encoding
+        self.encoder = character_encoder(encoding)
         if high_quality:
             self._write(self.QUALITY_MODE % 1)
             self._write(self.EMPHASIZED_MODE)
@@ -30,10 +32,6 @@ class Printer:
         """Generates a big blank separator between printed blocks."""
         self._write("\n" * 6)
 
-    def _encode(self, text: str) -> bytes:
-        encoder = character_encoder(self.encoding)
-        return b"".join(map(encoder, text))
-
     def _write(self, text: str) -> None:
-        with open(self.device, "wb") as fp:
-            fp.write(self._encode(text))
+        out_bytes = b"".join(map(self.encoder, text))
+        self.device.write(out_bytes)
