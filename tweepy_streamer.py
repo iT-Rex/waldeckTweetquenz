@@ -68,13 +68,19 @@ def main() -> None:
         type=FileType("wb"),
     )
     parser.add_argument(
+        "--encoding",
+        default="cp850",
+        help="Character set to use for the printer output (default: cp850)",
+    )
+    parser.add_argument(
         "--copy-to",
         help="Adds Tweets as JSON to this file, one per line",
         type=FileType("a"),
     )
     args = parser.parse_args()
 
-    listener = Listener(Printer(args.printer), outfile=args.copy_to)
+    printer = Printer(args.printer, encoding=args.encoding)
+    listener = Listener(printer, outfile=args.copy_to)
     stream_tweets(listener, TWITTER_KEYWORDS)
 
 
