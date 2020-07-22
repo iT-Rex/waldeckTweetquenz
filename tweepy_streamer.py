@@ -1,9 +1,8 @@
 import json
-import sys
+from argparse import ArgumentParser, FileType
+from typing import List, Optional, TextIO
 
-from tweepy.streaming import StreamListener
-from tweepy import OAuthHandler
-from tweepy import Stream
+from tweepy import OAuthHandler, Status, Stream, StreamListener
 
 from printer import Printer
 from twitter_credentials import (
@@ -24,35 +23,60 @@ TWITTER_KEYWORDS = [
 
 
 class Listener(StreamListener):
-    def __init__(self, printer: Printer):
+    def __init__(self, printer: Printer, outfile: Optional[TextIO] = None):
+        super().__init__()  # Initialize with default API
+        self.outfile = outfile
         self.printer = printer
 
-    def on_data(self, data):
-        tweet = json.loads(data)
-        for line in reflow(tweet["text"]):
+    def on_status(self, tweet: Status) -> None:
+        """Processes a tweet, or as Twitter calls it, a "status"."""
+        self.print_tweet(tweet)
+        self.store_tweet(tweet)
+
+    def on_error(self, status: int) -> None:
+        print(f"Error when using Twitter: {status}")
+
+    def print_tweet(self, tweet: Status) -> None:
+        for line in reflow(tweet.text):
             self.printer.print(line)
         self.printer.separator()
-        return True
 
-    def on_error(self, status):
-        print(status)
+    def store_tweet(self, tweet: Status) -> None:
+        details = {
+            "text": tweet.text,
+            "author": tweet.user.name,
+            "handle": tweet.user.screen_name,
+        }
+        if self.outfile is not None:
+            json.dump(details, self.outfile)
+            self.outfile.write("\n")
 
 
-def tweet_streamer(printer, hash_tag_list):
+def stream_tweets(listener: Listener, hash_tag_list: List[str]) -> None:
     auth = OAuthHandler(API_KEY, API_SECRET_KEY)
     auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-    stream = Stream(auth, Listener(printer))
+    stream = Stream(auth, listener)
     stream.filter(track=hash_tag_list)
 
 
-def main(printer_path: str = "/dev/lp0"):
-    with open(printer_path, "wb") as printer_fp:
-        printer = Printer(printer_fp)
-        tweet_streamer(printer, TWITTER_KEYWORDS)
+def main() -> None:
+    parser = ArgumentParser(description="Prints tweets to a line printer.")
+    parser.add_argument(
+        "--printer",
+        default="/dev/lp0",
+        help="Path to the printer device to use (default: /dev/lp0)",
+        type=FileType("wb"),
+    )
+    parser.add_argument(
+        "--copy-to",
+        help="Adds Tweets as JSON to this file, one per line",
+        type=FileType("a"),
+    )
+    args = parser.parse_args()
+
+    listener = Listener(Printer(args.printer), outfile=args.copy_to)
+    stream_tweets(listener, TWITTER_KEYWORDS)
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 2:
-        main(sys.argv[1])
-    else:
-        main()
+    main()
