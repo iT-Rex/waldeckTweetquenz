@@ -54,9 +54,9 @@ def print_tweet(tweet: Tweet, printer: Printer, left_margin: int = 0) -> None:
     printer.left_margin(left_margin)
     printer.print(tweet.author, bold=True, end=" ")
     printer.print(tweet.handle)
-    printer.print(" ∙ {tweet.created_at}}")
+    printer.print(" ∙ {tweet.created_at}")
     for line in reflow(tweet.text):
-        printer.print(line)
+        printer.print(line, wide=True, bold=True)
     if tweet.source:
         printer.print("── Sent from {tweet.sent_from}")
     printer.feed()
