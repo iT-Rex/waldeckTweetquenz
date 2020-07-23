@@ -1,6 +1,7 @@
 import json
 import time
 from argparse import ArgumentParser, FileType
+from dataclasses import asdict
 from http.client import HTTPException
 from typing import List, Optional, TextIO
 
@@ -13,7 +14,7 @@ from twitter_credentials import (
     ACCESS_TOKEN,
     ACCESS_TOKEN_SECRET,
 )
-from utils import reflow
+from utils import Tweet, reflow
 
 TWITTER_KEYWORDS = [
     "@BurgWaldeck",
@@ -32,25 +33,21 @@ class Listener(StreamListener):
 
     def on_status(self, tweet: Status) -> None:
         """Processes a tweet, or as Twitter calls it, a "status"."""
+        tweet = Tweet.from_status(tweet)
         self.print_tweet(tweet)
         self.store_tweet(tweet)
 
     def on_error(self, status: int) -> None:
         print(f"Error when using Twitter: {status}")
 
-    def print_tweet(self, tweet: Status) -> None:
+    def print_tweet(self, tweet: Tweet) -> None:
         for line in reflow(tweet.text):
             self.printer.print(line)
         self.printer.separator()
 
-    def store_tweet(self, tweet: Status) -> None:
-        details = {
-            "text": tweet.text,
-            "author": tweet.user.name,
-            "handle": tweet.user.screen_name,
-        }
+    def store_tweet(self, tweet: Tweet) -> None:
         if self.outfile is not None:
-            json.dump(details, self.outfile)
+            json.dump(asdict(tweet), self.outfile)
             self.outfile.write("\n")
 
 
