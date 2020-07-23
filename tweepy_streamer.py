@@ -1,5 +1,7 @@
 import json
+import time
 from argparse import ArgumentParser, FileType
+from http.client import HTTPException
 from typing import List, Optional, TextIO
 
 from tweepy import OAuthHandler, Status, Stream, StreamListener
@@ -81,7 +83,13 @@ def main() -> None:
 
     printer = Printer(args.printer, encoding=args.encoding)
     listener = Listener(printer, outfile=args.copy_to)
-    stream_tweets(listener, TWITTER_KEYWORDS)
+    while True:
+        try:
+            stream_tweets(listener, TWITTER_KEYWORDS)
+        except HTTPException as exc:
+            print(f"Something went wrong talking to twitter: {exc}")
+            print("  We'll retry in just a second")
+            time.sleep(1)  # Sometimes Twitter hangs up the phone, just retry
 
 
 if __name__ == "__main__":
