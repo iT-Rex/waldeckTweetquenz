@@ -31,9 +31,10 @@ class Listener(StreamListener):
         self.outfile = outfile
         self.printer = printer
 
-    def on_status(self, tweet: Status) -> None:
+    def on_status(self, status: Status) -> None:
         """Processes a tweet, or as Twitter calls it, a "status"."""
-        tweet = Tweet.from_status(tweet)
+        tweet = Tweet.from_status(status)
+        print(f"{status.created_at:%H:%M:%S} Printing tweet from {tweet.handle}")
         self.print_tweet(tweet)
         self.store_tweet(tweet)
 
