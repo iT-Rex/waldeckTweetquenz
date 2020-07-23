@@ -18,6 +18,8 @@ from twitter_credentials import (
 )
 from utils import Tweet
 
+PROGRAM_VERSION = "0.9"
+
 TWITTER_KEYWORDS = [
     "@BurgWaldeck",
     "@WFreakquenz",
@@ -78,6 +80,8 @@ def main() -> None:
         type=FileType("a"),
     )
     args = parser.parse_args()
+
+    print(f"TwitterPrinter v{PROGRAM_VERSION}, reporting for duty!")
 
     printer = Printer(args.printer, encoding=args.encoding)
     listener = Listener(printer, outfile=args.copy_to)
