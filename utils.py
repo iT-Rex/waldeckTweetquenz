@@ -7,7 +7,7 @@ from typing import Callable, Dict, Iterator, List, Optional
 
 from tweepy import Status
 
-SPECIAL_CHARACTERS = {"…": "¬", "’": "'"}
+SPECIAL_CHARACTERS = {"…": "¬", "’": "'", "‘": "'"}
 TWITTER_DATE_FORMAT = "%a %b %d %H:%M:%S %z %Y"
 WEEKDAYS = (
     "Montag",
