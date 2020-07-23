@@ -1,12 +1,38 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from textwrap import wrap
-from typing import Callable, Dict, Iterator, List
+from typing import Callable, Dict, Iterator, List, Optional
 
 from tweepy import Status
 
 SPECIAL_CHARACTERS = {"€": "C\b="}
+TWITTER_DATE_FORMAT = "%a %b %d %H:%M:%S %z %Y"
+WEEKDAYS = (
+    "Montag",
+    "Dienstag",
+    "Mittwoch",
+    "Donnerstag",
+    "Freitag",
+    "Samstag",
+    "Sonntag",
+)
+MONTHS = (
+    None,
+    "Januar",
+    "Februar",
+    "März",
+    "April",
+    "Mai",
+    "Juni",
+    "Juli",
+    "August",
+    "September",
+    "Oktober",
+    "November",
+    "Dezember",
+)
 
 
 @dataclass
@@ -17,6 +43,8 @@ class Tweet:
     tags: List[str]
     author: str
     handle: str
+    source: Optional[str]
+    created_at: str
 
     @classmethod
     def from_status(cls, status: Status) -> Tweet:
@@ -31,7 +59,16 @@ class Tweet:
             tags=list(tags),
             author=status.user.name,
             handle=f"@{status.user.screen_name}",
+            source=status.source,
+            created_at=cls._format_datetime(status.created_at),
         )
+
+    @classmethod
+    def _format_datetime(cls, dtime: datetime) -> str:
+        """Parses datetime from tweet and formats it for a German locale."""
+        weekday = WEEKDAYS[dtime.weekday()]
+        month = MONTHS[dtime.month]
+        return f"{weekday}, {dtime.day}. {month} {dtime.year}, {dtime:%H:%M}"
 
     @classmethod
     def _get_tags(cls, tags: List[Dict[str, str]]):
