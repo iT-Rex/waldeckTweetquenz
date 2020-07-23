@@ -10,7 +10,7 @@ class Printer:
     NON_EMPHASIZED_MODE = "\x1bF"
     DOUBLE_STRIKE_MODE = "\x1bG"
     EXTENDED_CHARACTER_MODE = "\x1b6"
-    LEFT_MARGIN_MODE = "\x1bl%d"
+    LEFT_MARGIN_MODE = "\x1b\x6c"
 
     def __init__(
         self, device: BinaryIO, width: int = 1, encoding: str = "cp437",
@@ -27,7 +27,7 @@ class Printer:
 
     def left_margin(self, margin: int) -> None:
         """Sets the default left margin, allowing it to be funky."""
-        self._write(self.LEFT_MARGIN_MODE % margin)
+        self._write(self.LEFT_MARGIN_MODE + chr(margin))
 
     def print(
         self, text: str, end: str = "\n", bold: bool = False, wide: bool = False
@@ -53,10 +53,10 @@ def print_tweet(tweet: Tweet, printer: Printer, left_margin: int = 0) -> None:
     """Takes a printer and a tweet and prints a nicely laid out block."""
     printer.left_margin(left_margin)
     printer.print(tweet.author, bold=True, end=" ")
-    printer.print(tweet.handle)
-    printer.print(f" ∙ {tweet.created_at}")
+    printer.print(f"({tweet.handle})", end=" ")
+    printer.print(f" · {tweet.created_at}", end="\n\n")
     for line in reflow(tweet.text):
         printer.print(line, wide=True, bold=True)
     if tweet.source:
-        printer.print("── Sent from {tweet.sent_from}")
+        printer.print("── Sent from {tweet.source}")
     printer.feed()
