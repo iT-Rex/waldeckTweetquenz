@@ -3,18 +3,19 @@ import time
 from argparse import ArgumentParser, FileType
 from dataclasses import asdict
 from http.client import HTTPException
+from random import randint
 from typing import List, Optional, TextIO
 
 from tweepy import OAuthHandler, Status, Stream, StreamListener
 
-from printer import Printer
+from printer import Printer, print_tweet
 from twitter_credentials import (
     API_KEY,
     API_SECRET_KEY,
     ACCESS_TOKEN,
     ACCESS_TOKEN_SECRET,
 )
-from utils import Tweet, reflow
+from utils import Tweet
 
 TWITTER_KEYWORDS = [
     "@BurgWaldeck",
@@ -42,9 +43,7 @@ class Listener(StreamListener):
         print(f"Error when using Twitter: {status}")
 
     def print_tweet(self, tweet: Tweet) -> None:
-        for line in reflow(tweet.text):
-            self.printer.print(line)
-        self.printer.separator()
+        print_tweet(tweet, self.printer, left_margin=randint(0, 10))
 
     def store_tweet(self, tweet: Tweet) -> None:
         if self.outfile is not None:
