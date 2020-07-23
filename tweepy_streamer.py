@@ -2,6 +2,7 @@ import json
 import time
 from argparse import ArgumentParser, FileType
 from dataclasses import asdict
+from datetime import datetime
 from http.client import HTTPException
 from random import randint
 from typing import List, Optional, TextIO
@@ -35,7 +36,7 @@ class Listener(StreamListener):
     def on_status(self, status: Status) -> None:
         """Processes a tweet, or as Twitter calls it, a "status"."""
         tweet = Tweet.from_status(status)
-        print(f"{status.created_at:%H:%M:%S} Printing tweet from {tweet.handle}")
+        print(f"{datetime.now():%F %T} Printing tweet from {tweet.handle}")
         self.print_tweet(tweet)
         self.store_tweet(tweet)
 
