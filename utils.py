@@ -18,6 +18,15 @@ WEEKDAYS = (
     "Samstag",
     "Sonntag",
 )
+WEEKDAYS_SHORT = (
+    "Mo",
+    "Di",
+    "Mi",
+    "Do",
+    "Fr",
+    "Sa",
+    "So",
+)
 MONTHS = (
     None,
     "Januar",
@@ -33,7 +42,21 @@ MONTHS = (
     "November",
     "Dezember",
 )
-
+MONTHS_SHORT = (
+    None,
+    "Jan.",
+    "Feb.",
+    "März",
+    "Apr.",
+    "Mai",
+    "Juni",
+    "Juli",
+    "Aug.",
+    "Sept.",
+    "Okt.",
+    "Nov.",
+    "Dez.",  
+)
 
 @dataclass
 class Tweet:
@@ -66,8 +89,8 @@ class Tweet:
     @classmethod
     def _format_datetime(cls, dtime: datetime) -> str:
         """Parses datetime from tweet and formats it for a German locale."""
-        weekday = WEEKDAYS[dtime.weekday()]
-        month = MONTHS[dtime.month]
+        weekday = WEEKDAYS_SHORT[dtime.weekday()]
+        month = MONTHS_SHORT[dtime.month]
         return f"{weekday}, {dtime.day}. {month} {dtime.year}, {dtime:%H:%M}"
 
     @classmethod
@@ -83,7 +106,8 @@ def character_encoder(encoding: str) -> Callable[[str], bytes]:
         try:
             return character.encode(encoding)
         except UnicodeEncodeError:
-            return "?".encode(encoding)
+            # \u2666 = ♦ = \x04 = diamond shape
+            return "♦".encode(encoding)
 
     return _encoder
 
