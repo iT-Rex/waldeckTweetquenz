@@ -46,7 +46,7 @@ class Listener(StreamListener):
         print(f"Error when using Twitter: {status}")
 
     def print_tweet(self, tweet: Tweet) -> None:
-        print_tweet(tweet, self.printer, left_margin=randint(0, 11))
+        print_tweet(tweet, self.printer, indent=randint(0, 11))
 
     def store_tweet(self, tweet: Tweet) -> None:
         if self.outfile is not None:

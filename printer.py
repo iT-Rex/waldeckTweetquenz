@@ -1,6 +1,13 @@
+from enum import Enum
 from typing import BinaryIO
 
 from utils import Tweet, character_encoder, reflow
+
+
+class Weight(Enum):
+    light = "light"
+    normal = "norma"
+    bold = "bold"
 
 
 class Printer:
@@ -9,54 +16,64 @@ class Printer:
     EMPHASIZED_MODE = "\x1bE"
     NON_EMPHASIZED_MODE = "\x1bF"
     DOUBLE_STRIKE_MODE = "\x1bG"
+    SINGLE_STRIKE_MODE = "\x1bH"
     EXTENDED_CHARACTER_MODE = "\x1b6"
-    LEFT_MARGIN_MODE = "\x1b\x6c"
+    WEIGHTS = {
+        Weight.light: SINGLE_STRIKE_MODE + NON_EMPHASIZED_MODE,
+        Weight.normal: DOUBLE_STRIKE_MODE + NON_EMPHASIZED_MODE,
+        Weight.bold: DOUBLE_STRIKE_MODE + EMPHASIZED_MODE,
+    }
 
     def __init__(
-        self, device: BinaryIO, width: int = 1, encoding: str = "cp437",
+        self, device: BinaryIO, width: int = 1, encoding: str = "cp437", left_margin=0,
     ):
         self.device = device
         self.encoder = character_encoder(encoding)
-        self._write(self.QUALITY_MODE % 1)
-        self._write(self.DOUBLE_STRIKE_MODE)
         self._write(self.EXTENDED_CHARACTER_MODE)
 
     def feed(self, lines: int = 4) -> None:
         """Generates a blank area between printed blocks."""
         self._write("\n" * lines)
 
-    def left_margin(self, margin: int) -> None:
-        """Sets the default left margin, allowing it to be funky."""
-        self._write(self.LEFT_MARGIN_MODE + chr(margin))
-
     def print(
-        self, text: str, end: str = "\n", bold: bool = False, wide: bool = False
+        self,
+        text: str,
+        indent: int = 0,
+        end: str = "\n",
+        weight: Weight = Weight.normal,
+        wide: bool = False,
+        nlq: bool = True,
     ) -> None:
         """Takes an input string and prints it, terminating with a newline.
 
-        If newline termination is not desired, an alternative `end` string can
-        be provided.
-
-        The `bold` parameter controls Emphasized printing, wheras the `wide`
-        parameter controls double-width mode.
+        Indentation can be controlled using `indent` as a number of spaces.
+        Alternate termination can be achieved by providing an `end` string.
+        Font weight is controlled by providing a Weight enum to `weight`.
+        Double-wide printing and 'near-letter-quality' are controlled using
+        the `wide` and `nlq` parameters respectively.
         """
-        self._write(self.EMPHASIZED_MODE if bold else self.NON_EMPHASIZED_MODE)
+        if indent:
+            self._write(self.WIDE_MODE % 1)
+            self._write(" " * indent)
+        self._write(self.WEIGHTS[weight])
         self._write(self.WIDE_MODE % int(wide))
+        self._write(self.QUALITY_MODE % int(nlq))
         self._write(text + end)
+        # Switch NLQ light on, because it's like that on the CD Cover ;)
+        self._write(self.QUALITY_MODE % 1)
 
     def _write(self, text: str) -> None:
         out_bytes = b"".join(map(self.encoder, text))
         self.device.write(out_bytes)
 
 
-def print_tweet(tweet: Tweet, printer: Printer, left_margin: int = 0) -> None:
+def print_tweet(tweet: Tweet, printer: Printer, indent: int = 0) -> None:
     """Takes a printer and a tweet and prints a nicely laid out block."""
-    printer.left_margin(left_margin)
-    printer.print(tweet.author, bold=True, end=" ")
-    printer.print(f"({tweet.handle})", end=" ")
-    printer.print(f" · {tweet.created_at}", end="\n\n")
+    printer.print(tweet.author, indent=indent, weight=Weight.bold, end=" ")
+    printer.print(f"({tweet.handle})", end=" ", weight=Weight.light)
+    printer.print(f" · {tweet.created_at}", end="\n\n", weight=Weight.light, nlq=False)
     for line in reflow(tweet.text):
-        printer.print(line, wide=True, bold=True)
+        printer.print(line, indent=indent, weight=Weight.bold, wide=True)
     if tweet.source:
-        printer.print("── Sent from {tweet.source}")
+        printer.print(f" ── Sent from {tweet.source}", indent=indent, nlq=False)
     printer.feed()
