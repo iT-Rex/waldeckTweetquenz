@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from datetime import datetime
 from textwrap import wrap
@@ -21,6 +22,7 @@ SPECIAL_CHARACTERS = {
     "›": "»",
     "❤": "\x03",
 }
+EMOJI = re.compile(r"[\U0001F300-\U0001FADF]")
 TWITTER_DATE_FORMAT = "%a %b %d %H:%M:%S %z %Y"
 WEEKDAYS_SHORT = "Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"
 MONTHS_SHORT = (
@@ -86,9 +88,11 @@ def character_encoder(encoding: str) -> Callable[[str], bytes]:
         try:
             if character in SPECIAL_CHARACTERS:
                 return SPECIAL_CHARACTERS[character].encode(encoding)
+            if EMOJI.match(character):
+                return "■".encode(encoding)
             return character.encode(encoding)
         except UnicodeEncodeError:
-            return b"\xfe"  # encoding result of last resort
+            return b"\x04"  # encoding result of last resort
 
     return _encoder
 
