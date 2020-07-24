@@ -1,13 +1,6 @@
-from enum import Enum
 from typing import BinaryIO
 
 from utils import Tweet, character_encoder, reflow
-
-
-class Weight(Enum):
-    light = "light"
-    normal = "norma"
-    bold = "bold"
 
 
 class Printer:
@@ -19,9 +12,9 @@ class Printer:
     SINGLE_STRIKE_MODE = "\x1bH"
     EXTENDED_CHARACTER_MODE = "\x1b6"
     WEIGHTS = {
-        Weight.light: SINGLE_STRIKE_MODE + NON_EMPHASIZED_MODE,
-        Weight.normal: DOUBLE_STRIKE_MODE + NON_EMPHASIZED_MODE,
-        Weight.bold: DOUBLE_STRIKE_MODE + EMPHASIZED_MODE,
+        "light": SINGLE_STRIKE_MODE + NON_EMPHASIZED_MODE,
+        "normal": DOUBLE_STRIKE_MODE + NON_EMPHASIZED_MODE,
+        "bold": DOUBLE_STRIKE_MODE + EMPHASIZED_MODE,
     }
 
     def __init__(
@@ -40,7 +33,7 @@ class Printer:
         text: str,
         indent: int = 0,
         end: str = "\n",
-        weight: Weight = Weight.normal,
+        weight: str = "normal",
         wide: bool = False,
         nlq: bool = True,
     ) -> None:
@@ -48,7 +41,7 @@ class Printer:
 
         Indentation can be controlled using `indent` as a number of spaces.
         Alternate termination can be achieved by providing an `end` string.
-        Font weight is controlled by providing a Weight enum to `weight`.
+        Weight is controlled by providing one of 'light', 'normal' or 'bold'.
         Double-wide printing and 'near-letter-quality' are controlled using
         the `wide` and `nlq` parameters respectively.
         """
@@ -69,11 +62,11 @@ class Printer:
 
 def print_tweet(tweet: Tweet, printer: Printer, indent: int = 0) -> None:
     """Takes a printer and a tweet and prints a nicely laid out block."""
-    printer.print(tweet.author, indent=indent, weight=Weight.bold, end=" ")
-    printer.print(f"({tweet.handle})", end=" ", weight=Weight.light)
-    printer.print(f" · {tweet.created_at}", end="\n\n", weight=Weight.light, nlq=False)
+    printer.print(tweet.author, indent=indent, weight="bold", end=" ")
+    printer.print(f"({tweet.handle})", end=" ", weight="light")
+    printer.print(f" · {tweet.created_at}", end="\n\n", weight="light", nlq=False)
     for line in reflow(tweet.text):
-        printer.print(line, indent=indent, weight=Weight.bold, wide=True)
+        printer.print(line, indent=indent, weight="bold", wide=True)
     if tweet.source:
         printer.print(f" ── Sent from {tweet.source}", indent=indent, nlq=False)
     printer.feed()
