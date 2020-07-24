@@ -9,10 +9,17 @@ from tweepy import Status
 
 SPECIAL_CHARACTERS = {
     "…": "_",
+    "€": "ε",
+    "₤": "£",
     "’": "'",
     "‘": "'",
-    "€": "ε",
-    "❤": "♥",
+    "‚": "'",
+    "„": '"',
+    "“": '"',
+    "”": '"',
+    "‹": "«",
+    "›": "»",
+    "❤": "\x03",
 }
 TWITTER_DATE_FORMAT = "%a %b %d %H:%M:%S %z %Y"
 WEEKDAYS_SHORT = "Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"
@@ -76,13 +83,12 @@ class Tweet:
 
 def character_encoder(encoding: str) -> Callable[[str], bytes]:
     def _encoder(character: str) -> bytes:
-        if character in SPECIAL_CHARACTERS:
-            return SPECIAL_CHARACTERS[character].encode(encoding)
         try:
+            if character in SPECIAL_CHARACTERS:
+                return SPECIAL_CHARACTERS[character].encode(encoding)
             return character.encode(encoding)
         except UnicodeEncodeError:
-            # \u2666 = ♦ = \x04 = diamond shape
-            return "♦".encode(encoding)
+            return b"\xfe"  # encoding result of last resort
 
     return _encoder
 
