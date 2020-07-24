@@ -9,18 +9,26 @@ from typing import Callable, Dict, Iterator, List, Optional
 from tweepy import Status
 
 SPECIAL_CHARACTERS = {
-    "…": "_",
-    "€": "ε",
-    "₤": "£",
-    "’": "'",
-    "‘": "'",
-    "‚": "'",
-    "„": '"',
-    "“": '"',
-    "”": '"',
-    "‹": "«",
-    "›": "»",
-    "❤": "\x03",
+    "cp437": {
+        "…": "_",
+        "€": "ε",
+        "₤": "£",
+        "’": "'",
+        "‘": "'",
+        "‚": "'",
+        "„": '"',
+        "“": '"',
+        "”": '"',
+        "‹": "«",
+        "›": "»",
+        "☺": "\x01",
+        "☻": "\x02",
+        "♥": "\x03",
+        "♦": "\x04",
+        "♣": "\x05",
+        "♠": "\x06",
+        "❤": "\x03",
+    }
 }
 EMOJI = re.compile(r"[\U0001F300-\U0001FADF]")
 TWITTER_DATE_FORMAT = "%a %b %d %H:%M:%S %z %Y"
@@ -84,10 +92,12 @@ class Tweet:
 
 
 def character_encoder(encoding: str) -> Callable[[str], bytes]:
+    substitution_map = SPECIAL_CHARACTERS.get(encoding, {})
+
     def _encoder(character: str) -> bytes:
         try:
-            if character in SPECIAL_CHARACTERS:
-                return SPECIAL_CHARACTERS[character].encode(encoding)
+            if (substitution := substitution_map.get(character)) is not None:
+                return substitution.encode(encoding)
             if EMOJI.match(character):
                 return "■".encode(encoding)
             return character.encode(encoding)
