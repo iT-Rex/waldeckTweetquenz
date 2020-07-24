@@ -3,11 +3,11 @@ import time
 from argparse import ArgumentParser, FileType
 from dataclasses import asdict
 from datetime import datetime
-from http.client import HTTPException
 from random import randint
 from typing import List, Optional, TextIO
 
 from tweepy import OAuthHandler, Status, Stream, StreamListener
+from urllib3.exceptions import HTTPError
 
 from printer import Printer, print_tweet
 from twitter_credentials import (
@@ -18,7 +18,7 @@ from twitter_credentials import (
 )
 from utils import Tweet
 
-PROGRAM_VERSION = "0.9.2"
+PROGRAM_VERSION = "0.9.14 - Lazy Lora"
 
 TWITTER_KEYWORDS = [
     "@BurgWaldeck",
@@ -67,7 +67,7 @@ def main() -> None:
         "--printer",
         default="/dev/lp0",
         help="Path to the printer device to use (default: /dev/lp0)",
-        type=FileType("wb"),
+        type=FileType("wb", bufsize=0),
     )
     parser.add_argument(
         "--encoding",
@@ -77,7 +77,7 @@ def main() -> None:
     parser.add_argument(
         "--copy-to",
         help="Adds Tweets as JSON to this file, one per line",
-        type=FileType("a"),
+        type=FileType("a", bufsize=1),
     )
     args = parser.parse_args()
 
@@ -88,7 +88,7 @@ def main() -> None:
     while True:
         try:
             stream_tweets(listener, TWITTER_KEYWORDS)
-        except HTTPException as exc:
+        except HTTPError as exc:
             print(f"Something went wrong talking to twitter: {exc}")
             print("  We'll retry in just a second")
             time.sleep(1)  # Sometimes Twitter hangs up the phone, just retry
