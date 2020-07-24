@@ -1,25 +1,33 @@
-from typing import BinaryIO
+from enum import Enum, auto
+from typing import BinaryIO, Set
 
 from utils import Tweet, character_encoder, reflow
 
 
-class Printer:
-    WIDE_MODE = "\x1bW%d"
-    QUALITY_MODE = "\x1bx%d"
-    EMPHASIZED_MODE = "\x1bE"
-    NON_EMPHASIZED_MODE = "\x1bF"
-    DOUBLE_STRIKE_MODE = "\x1bG"
-    SINGLE_STRIKE_MODE = "\x1bH"
-    EXTENDED_CHARACTER_MODE = "\x1b6"
-    WEIGHTS = {
-        "light": SINGLE_STRIKE_MODE + NON_EMPHASIZED_MODE,
-        "normal": DOUBLE_STRIKE_MODE + NON_EMPHASIZED_MODE,
-        "bold": DOUBLE_STRIKE_MODE + EMPHASIZED_MODE,
-    }
+class Mode(Enum):
+    double_strike = auto()
+    emphasized = auto()
+    nlq = auto()
+    wide = auto()
 
-    def __init__(
-        self, device: BinaryIO, width: int = 1, encoding: str = "cp437", left_margin=0,
-    ):
+
+class Style(Enum):
+    author = {Mode.double_strike, Mode.emphasized, Mode.nlq}
+    handle = {Mode.emphasized, Mode.nlq}
+    separator = {Mode.double_strike, Mode.emphasized}
+    timestamp = {Mode.emphasized}
+    body = {Mode.double_strike, Mode.emphasized, Mode.nlq, Mode.wide}
+    footer: Set[Mode] = set()
+
+
+class Printer:
+    WIDE_TOGGLE = "\x1bW0", "\x1bW1"
+    NLQ_TOGGLE = "\x1bx0", "\x1bx1"
+    EMPHASIZED_TOGGLE = "\x1bE", "\x1bF"
+    DOUBLE_STRIKE_TOGGLE = "\x1bG", "\x1bH"
+    EXTENDED_CHARACTER_MODE = "\x1b6"
+
+    def __init__(self, device: BinaryIO, encoding: str = "cp437"):
         self.device = device
         self.encoder = character_encoder(encoding)
         self._write(self.EXTENDED_CHARACTER_MODE)
@@ -28,32 +36,28 @@ class Printer:
         """Generates a blank area between printed blocks."""
         self._write("\n" * lines)
 
-    def print(
-        self,
-        text: str,
-        indent: int = 0,
-        end: str = "\n",
-        weight: str = "normal",
-        wide: bool = False,
-        nlq: bool = True,
-    ) -> None:
+    def print(self, text: str, style: Style, indent: int = 0, end: str = "\n") -> None:
         """Takes an input string and prints it, terminating with a newline.
 
         Indentation can be controlled using `indent` as a number of spaces.
         Alternate termination can be achieved by providing an `end` string.
-        Weight is controlled by providing one of 'light', 'normal' or 'bold'.
-        Double-wide printing and 'near-letter-quality' are controlled using
-        the `wide` and `nlq` parameters respectively.
+        Style is controlled by passing a Style enum, whose values are a set
+        of Mode parameters, understood by the Printer.
         """
         if indent:
-            self._write(self.WIDE_MODE % 1)
+            self._write(self.WIDE_TOGGLE[False])
             self._write(" " * indent)
-        self._write(self.WEIGHTS[weight])
-        self._write(self.WIDE_MODE % int(wide))
-        self._write(self.QUALITY_MODE % int(nlq))
+        self._set_modes(style.value)
         self._write(text + end)
         # Switch NLQ light on, because it's like that on the CD Cover ;)
-        self._write(self.QUALITY_MODE % 1)
+        self._write(self.NLQ_TOGGLE[True])
+
+    def _set_modes(self, modes: Set[Mode]):
+        """Sends mode toggles based on their enabled state in the given set."""
+        self._write(self.WIDE_TOGGLE[Mode.wide in modes])
+        self._write(self.NLQ_TOGGLE[Mode.nlq in modes])
+        self._write(self.EMPHASIZED_TOGGLE[Mode.emphasized in modes])
+        self._write(self.DOUBLE_STRIKE_TOGGLE[Mode.double_strike in modes])
 
     def _write(self, text: str) -> None:
         out_bytes = b"".join(map(self.encoder, text))
@@ -62,11 +66,12 @@ class Printer:
 
 def print_tweet(tweet: Tweet, printer: Printer, indent: int = 0) -> None:
     """Takes a printer and a tweet and prints a nicely laid out block."""
-    printer.print(tweet.author, indent=indent, weight="bold", end=" ")
-    printer.print(f"({tweet.handle})", end=" ", weight="light")
-    printer.print(f" · {tweet.created_at}", end="\n\n", weight="light", nlq=False)
+    printer.print(tweet.author, Style.author, indent=indent, end=" ")
+    printer.print(f"({tweet.handle})", Style.handle, end=" ")
+    printer.print("·", Style.separator, end=" ")
+    printer.print(tweet.created_at, Style.timestamp, end="\n\n")
     for line in reflow(tweet.text):
-        printer.print(line, indent=indent, weight="bold", wide=True)
+        printer.print(line, Style.body, indent=indent)
     if tweet.source:
-        printer.print(f" ── Sent from {tweet.source}", indent=indent, nlq=False)
+        printer.print(f" ── Sent from {tweet.source}", Style.footer, indent=indent)
     printer.feed()
