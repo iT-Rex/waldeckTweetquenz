@@ -46,7 +46,7 @@ class Listener(StreamListener):
         print(f"Error when using Twitter: {status}")
 
     def print_tweet(self, tweet: Tweet) -> None:
-        print_tweet(tweet, self.printer, left_margin=randint(0, 10))
+        print_tweet(tweet, self.printer, left_margin=randint(0, 11))
 
     def store_tweet(self, tweet: Tweet) -> None:
         if self.outfile is not None:
@@ -71,8 +71,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--encoding",
-        default="cp850",
-        help="Character set to use for the printer output (default: cp850)",
+        default="cp437",
+        help="Character set to use for the printer output (default: cp437)",
     )
     parser.add_argument(
         "--copy-to",
