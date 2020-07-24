@@ -9,45 +9,13 @@ from tweepy import Status
 
 SPECIAL_CHARACTERS = {
     "…": "_",
-    "’": "'", 
-    "‘": "'", 
-    "€": "ε", 
+    "’": "'",
+    "‘": "'",
+    "€": "ε",
     "❤": "♥",
 }
 TWITTER_DATE_FORMAT = "%a %b %d %H:%M:%S %z %Y"
-WEEKDAYS = (
-    "Montag",
-    "Dienstag",
-    "Mittwoch",
-    "Donnerstag",
-    "Freitag",
-    "Samstag",
-    "Sonntag",
-)
-WEEKDAYS_SHORT = (
-    "Mo",
-    "Di",
-    "Mi",
-    "Do",
-    "Fr",
-    "Sa",
-    "So",
-)
-MONTHS = (
-    None,
-    "Januar",
-    "Februar",
-    "März",
-    "April",
-    "Mai",
-    "Juni",
-    "Juli",
-    "August",
-    "September",
-    "Oktober",
-    "November",
-    "Dezember",
-)
+WEEKDAYS_SHORT = "Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"
 MONTHS_SHORT = (
     None,
     "Jan.",
@@ -61,8 +29,9 @@ MONTHS_SHORT = (
     "Sept.",
     "Okt.",
     "Nov.",
-    "Dez.",  
+    "Dez.",
 )
+
 
 @dataclass
 class Tweet:
