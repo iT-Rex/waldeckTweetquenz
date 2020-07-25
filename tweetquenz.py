@@ -39,8 +39,8 @@ class Listener(StreamListener):
         """Processes a tweet, or as Twitter calls it, a "status"."""
         tweet = Tweet.from_status(status)
         print(f"{datetime.now():%F %T} Printing tweet from {tweet.handle}")
-        self.print_tweet(tweet)
         self.store_tweet(tweet)
+        self.print_tweet(tweet)
 
     def on_error(self, status: int) -> None:
         print(f"Error when using Twitter: {status}")
