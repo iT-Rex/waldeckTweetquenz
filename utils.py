@@ -130,4 +130,7 @@ def character_encoder(encoding: str) -> Callable[[str], bytes]:
 
 def reflow(text: str, line_length: int = 30) -> Iterator[str]:
     for paragraph in text.split("\n"):
-        yield from wrap(paragraph, width=line_length)
+        if paragraph:
+            yield from wrap(paragraph, width=line_length)
+        else:
+            yield ""
