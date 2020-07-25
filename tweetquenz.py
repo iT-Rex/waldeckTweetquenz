@@ -18,7 +18,7 @@ from twitter_credentials import (
 )
 from utils import Tweet
 
-PROGRAM_VERSION = "0.9.15 - Mumbling Mamba"
+PROGRAM_VERSION = "0.9.16 - Narcoleptic Night-snake"
 
 TWITTER_KEYWORDS = [
     "@BurgWaldeck",
