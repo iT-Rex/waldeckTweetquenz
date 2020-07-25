@@ -23,8 +23,8 @@ class Style(Enum):
 class Printer:
     WIDE_TOGGLE = "\x1bW0", "\x1bW1"
     NLQ_TOGGLE = "\x1bx0", "\x1bx1"
-    EMPHASIZED_TOGGLE = "\x1bE", "\x1bF"
-    DOUBLE_STRIKE_TOGGLE = "\x1bG", "\x1bH"
+    EMPHASIZED_TOGGLE = "\x1bF", "\x1bE"
+    DOUBLE_STRIKE_TOGGLE = "\x1bH", "\x1bG"
     EXTENDED_CHARACTER_MODE = "\x1b6"
 
     def __init__(self, device: BinaryIO, encoding: str = "cp437"):
@@ -45,7 +45,7 @@ class Printer:
         of Mode parameters, understood by the Printer.
         """
         if indent:
-            self._write(self.WIDE_TOGGLE[False])
+            self._write(self.WIDE_TOGGLE[True])
             self._write(" " * indent)
         self._set_modes(style.value)
         self._write(text + end)
