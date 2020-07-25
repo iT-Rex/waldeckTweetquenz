@@ -6,6 +6,7 @@ from datetime import datetime
 from random import randrange
 from typing import List, Optional, TextIO
 
+from serial import Serial
 from tweepy import OAuthHandler, Status, Stream, StreamListener
 from urllib3.exceptions import HTTPError
 
@@ -30,8 +31,14 @@ TWITTER_KEYWORDS = [
 
 
 class Listener(StreamListener):
-    def __init__(self, printer: Printer, outfile: Optional[TextIO] = None):
+    def __init__(
+        self,
+        printer: Printer,
+        arduino: Optional[Serial] = None,
+        outfile: Optional[TextIO] = None,
+    ):
         super().__init__()  # Initialize with default API
+        self.arduino = arduino
         self.outfile = outfile
         self.printer = printer
 
@@ -40,6 +47,7 @@ class Listener(StreamListener):
         tweet = Tweet.from_status(status)
         print(f"{datetime.now():%F %T} Printing tweet from {tweet.handle}")
         self.store_tweet(tweet)
+        self.signal_arduino()
         self.print_tweet(tweet)
 
     def on_error(self, status: int) -> None:
@@ -47,6 +55,10 @@ class Listener(StreamListener):
 
     def print_tweet(self, tweet: Tweet) -> None:
         print_tweet(tweet, self.printer, indent=randrange(12))
+
+    def signal_arduino(self) -> None:
+        if self.arduino is not None:
+            self.arduino.write("tweet!")
 
     def store_tweet(self, tweet: Tweet) -> None:
         if self.outfile is not None:
@@ -79,12 +91,20 @@ def main() -> None:
         help="Adds Tweets as JSON to this file, one per line",
         type=FileType("a", bufsize=1),
     )
+    parser.add_argument("--arduino", help="Serial port for external Arduino triggers.")
+    parser.add_argument(
+        "--baudrate",
+        type=int,
+        default=9600,
+        help="Arduino serial baudrate (default: 9600)",
+    )
     args = parser.parse_args()
 
     print(f"TwitterPrinter v{PROGRAM_VERSION}, reporting for duty!")
 
+    arduino_serial = Serial(port=args.arduino, baudrate=args.baudrate)
     printer = Printer(args.printer, encoding=args.encoding)
-    listener = Listener(printer, outfile=args.copy_to)
+    listener = Listener(printer, arduino=arduino_serial, outfile=args.copy_to)
     while True:
         try:
             stream_tweets(listener, TWITTER_KEYWORDS)
