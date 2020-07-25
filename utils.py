@@ -21,16 +21,35 @@ SPECIAL_CHARACTERS = {
         "”": '"',
         "‹": "«",
         "›": "»",
+        "▪": "∙",
+        "◼": "▄",
+        "◾": "■",
+        "➗": "÷",
+        "⚪": "°",
+        "⚫": "∙",
         "☺": "\x01",
         "☻": "\x02",
         "♥": "\x03",
+        "❣": "\x03",
+        "❤": "\x03",
         "♦": "\x04",
         "♣": "\x05",
         "♠": "\x06",
+        "♠": "\x06",
         "❤": "\x03",
+        "❓": "?",
+        "❔": "?",
+        "❕": "!",
+        "❗": "!",
+        "✖": "x",
+        "❌": "x",
+        "➕": "+",
+        "➖": "-",
     }
 }
-EMOJI = re.compile(r"[\U0001F300-\U0001FADF]")
+UNICODE_EMOJI = re.compile(r"[\U0001F300-\U0001FADF]")
+UNIVODE_VARIATION_SELECTORS = re.compile(r"[\uFE00-\uFE0F]")
+
 TWITTER_DATE_FORMAT = "%a %b %d %H:%M:%S %z %Y"
 WEEKDAYS_SHORT = "Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"
 MONTHS_SHORT = (
@@ -98,8 +117,10 @@ def character_encoder(encoding: str) -> Callable[[str], bytes]:
         try:
             if (substitution := substitution_map.get(character)) is not None:
                 return substitution.encode(encoding)
-            if EMOJI.match(character):
+            if UNICODE_EMOJI.match(character):
                 return "■".encode(encoding)
+            if UNIVODE_VARIATION_SELECTORS.match(character):
+                return b""
             return character.encode(encoding)
         except UnicodeEncodeError:
             return b"\x04"  # encoding result of last resort
