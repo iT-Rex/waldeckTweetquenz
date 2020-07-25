@@ -58,7 +58,7 @@ class Listener(StreamListener):
 
     def signal_arduino(self) -> None:
         if self.arduino is not None:
-            self.arduino.write("tweet!")
+            self.arduino.write(b"tweet!")
 
     def store_tweet(self, tweet: Tweet) -> None:
         if self.outfile is not None:
@@ -102,7 +102,9 @@ def main() -> None:
 
     print(f"TwitterPrinter v{PROGRAM_VERSION}, reporting for duty!")
 
-    arduino_serial = Serial(port=args.arduino, baudrate=args.baudrate)
+    if args.arduino is not None:
+        arduino_serial = Serial(port=args.arduino, baudrate=args.baudrate)
+        arduino_serial.write(b"hello!")
     printer = Printer(args.printer, encoding=args.encoding)
     listener = Listener(printer, arduino=arduino_serial, outfile=args.copy_to)
     while True:
