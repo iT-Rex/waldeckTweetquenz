@@ -7,11 +7,32 @@
 #define MIN_INTENSITY 2
 
 /*
- * Connect the Gate of a MOSFET through around 200 Ohm to PIN_LEDSTRIP (make sure that this pin is PWM-capable!)
+ *                 +--------------------------------------------------o LED strip -
+ *                 |
+ *         =================                                 +--------o LED strip +
+ *         [  G    D    S  ]   IRL540 MOSFET                 |
+ *          ~~~~~~~~~~~~~~~                                  |
+ *            |         |                                    |
+ *            +-/\/\/\/-+  10k resistor                      |
+ *            |         |                                    |
+ *            |         +------------------------------+     |
+ *            <         |                              |     |
+ *    220 Ohm >         |                              |     |
+ *   resistor <         |       ~ 100nF                |     |
+ *            >         +------o---||---o              |     |
+ *            |         |               |              |     |
+ *            |         |               |              |     |
+ *            o         o               |              |     |
+ *        PWM pin      GND            RESET           GND   12V
+ *        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~           ~~~~~~~~~
+ *                     ARDUINO                       EXTERNAL PSU
+ *
+ * Connect the Gate of a MOSFET through around 220 Ohm to PIN_LEDSTRIP (make sure that this pin is PWM-capable!)
  * Connect the Source of the MOSFET to GND
  * Put around 10k Ohm between the Gate and the Source
  * Connect your LED-strip to the Drain of the MOSFET and a sufficiently powerful powersupply
  * Connect the powersupply GND to one of the Arduino's GND pins
+ * Add a ~100nF capacitor between RESET and GND (after programming). Put it in a socket, to make it easy to remove for programming.
  * Connect the Arduino (via USB) to a computer running the TwitterPrinter script
  */
 
