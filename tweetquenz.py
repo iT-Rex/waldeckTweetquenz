@@ -3,7 +3,7 @@ import time
 from argparse import ArgumentParser, FileType
 from dataclasses import asdict
 from datetime import datetime
-from random import randint
+from random import randrange
 from typing import List, Optional, TextIO
 
 from tweepy import OAuthHandler, Status, Stream, StreamListener
@@ -46,7 +46,7 @@ class Listener(StreamListener):
         print(f"Error when using Twitter: {status}")
 
     def print_tweet(self, tweet: Tweet) -> None:
-        print_tweet(tweet, self.printer, indent=randint(0, 11))
+        print_tweet(tweet, self.printer, indent=randrange(12))
 
     def store_tweet(self, tweet: Tweet) -> None:
         if self.outfile is not None:

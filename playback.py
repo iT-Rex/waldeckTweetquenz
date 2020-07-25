@@ -1,5 +1,6 @@
 import json
 from argparse import ArgumentParser, FileType
+from random import randrange
 
 from printer import Printer, print_tweet
 from utils import Tweet
@@ -26,7 +27,7 @@ def main() -> None:
     printer = Printer(args.printer, encoding=args.encoding)
     for line in args.archive:
         tweet = Tweet(**json.loads(line))
-        print_tweet(tweet, printer)
+        print_tweet(tweet, printer, indent=randrange(12))
 
 
 if __name__ == "__main__":
