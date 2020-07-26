@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import re
+import xml.sax.saxutils as saxutils
+
 from dataclasses import dataclass
 from datetime import datetime
 from textwrap import wrap
@@ -89,7 +91,7 @@ class Tweet:
             text = status.text
             tags = cls._get_tags(status.entities["hashtags"])
         return cls(
-            text=text,
+            text=saxutils.unescape(text), # remove Twitter's annoying XML-encoding (&lt;, &gt;, and &amp;)
             tags=list(tags),
             author=status.user.name,
             handle=f"@{status.user.screen_name}",
