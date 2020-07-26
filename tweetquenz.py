@@ -44,6 +44,7 @@ class Listener(StreamListener):
 
     def on_status(self, status: Status) -> None:
         """Processes a tweet, or as Twitter calls it, a "status"."""
+        self.store_raw_status(status)
         tweet = Tweet.from_status(status)
         print(f"{datetime.now():%F %T} Printing tweet from {tweet.handle}")
         self.store_tweet(tweet)
@@ -59,6 +60,11 @@ class Listener(StreamListener):
     def signal_arduino(self) -> None:
         if self.arduino is not None:
             self.arduino.write(b"tweet!")
+
+    def store_raw_status(self, status: Status) -> None:
+        if self.rawfile is not None:
+            json.dump(Status, self.rawfile)
+            self.rawfile.write("\n")
 
     def store_tweet(self, tweet: Tweet) -> None:
         if self.outfile is not None:
@@ -91,6 +97,11 @@ def main() -> None:
         help="Adds Tweets as JSON to this file, one per line",
         type=FileType("a", bufsize=1),
     )
+    parser.add_argument(
+        "--dump-raw-to",
+        help="Dumps the raw Twitter-status to this file, one per line",
+        type=FileType("a", bufsize=1),
+    )
     parser.add_argument("--arduino", help="Serial port for external Arduino triggers.")
     parser.add_argument(
         "--baudrate",
@@ -104,7 +115,7 @@ def main() -> None:
 
     if args.arduino is not None:
         arduino_serial = Serial(port=args.arduino, baudrate=args.baudrate)
-        arduino_serial.write(b"hello!")
+        arduino_serial.write(b"Hello!")
     printer = Printer(args.printer, encoding=args.encoding)
     listener = Listener(printer, arduino=arduino_serial, outfile=args.copy_to)
     while True:
