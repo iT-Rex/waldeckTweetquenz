@@ -66,7 +66,7 @@ class Listener(StreamListener):
 
     def store_raw_status(self, status: Status) -> None:
         if self.rawfile is not None:
-            json.dump(asdict(Status), self.rawfile)
+            json.dump(Status._json, self.rawfile)
             self.rawfile.write("\n")
 
     def store_tweet(self, tweet: Tweet) -> None:
