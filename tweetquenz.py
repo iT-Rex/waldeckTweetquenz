@@ -19,7 +19,7 @@ from twitter_credentials import (
 )
 from utils import Tweet
 
-PROGRAM_VERSION = "0.9.16c - Narcoleptic Night-snake"
+PROGRAM_VERSION = "0.9.16d - Narcoleptic Night-snake"
 
 TWITTER_KEYWORDS = [
     "@BurgWaldeck",
@@ -47,11 +47,11 @@ class Listener(StreamListener):
 
     def on_status(self, status: Status) -> None:
         """Processes a tweet, or as Twitter calls it, a "status"."""
+        self.signal_arduino() # first, turn the lights on
         self.store_raw_status(status)
         tweet = Tweet.from_status(status)
         print(f"{datetime.now():%F %T} Printing tweet from {tweet.handle}")
         self.store_tweet(tweet)
-        self.signal_arduino()
         self.print_tweet(tweet)
 
     def on_error(self, status: int) -> None:
@@ -120,7 +120,7 @@ def main() -> None:
         arduino_serial = Serial(port=args.arduino, baudrate=args.baudrate)
         arduino_serial.write(b"Hello!")
     printer = Printer(args.printer, encoding=args.encoding)
-    listener = Listener(printer, arduino=arduino_serial, outfile=args.copy_to)
+    listener = Listener(printer, arduino=arduino_serial, outfile=args.copy_to, rawfile=args.dump_raw_to)
     while True:
         try:
             stream_tweets(listener, TWITTER_KEYWORDS)
