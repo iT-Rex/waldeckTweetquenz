@@ -36,10 +36,12 @@ class Listener(StreamListener):
         self,
         printer: Printer,
         arduino: Optional[Serial] = None,
+        rawfile: Optional[TextIO] = None,
         outfile: Optional[TextIO] = None,
     ):
         super().__init__()  # Initialize with default API
         self.arduino = arduino
+        self.rawfile = rawfile
         self.outfile = outfile
         self.printer = printer
 
@@ -64,7 +66,7 @@ class Listener(StreamListener):
 
     def store_raw_status(self, status: Status) -> None:
         if self.rawfile is not None:
-            json.dump(Status, self.rawfile)
+            json.dump(asdict(Status), self.rawfile)
             self.rawfile.write("\n")
 
     def store_tweet(self, tweet: Tweet) -> None:
