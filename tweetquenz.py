@@ -27,6 +27,7 @@ TWITTER_KEYWORDS = [
     "#digitalfreakquenz",
     "#waldeckfreakquenz",
     "freakquenz",
+    "#twitterprinter",
 ]
 
 
