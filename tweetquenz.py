@@ -19,7 +19,7 @@ from twitter_credentials import (
 )
 from utils import Tweet
 
-PROGRAM_VERSION = "0.9.16f - Narcoleptic Night-snake"
+PROGRAM_VERSION = "0.9.16g - Narcoleptic Night-snake"
 
 TWITTER_KEYWORDS = [
     "@BurgWaldeck",
@@ -66,7 +66,7 @@ class Listener(StreamListener):
 
     def store_raw_status(self, status: Status) -> None:
         if self.rawfile is not None:
-            json.dump(status, self.rawfile)
+            json.dump(status._json, self.rawfile)
             self.rawfile.write("\n")
 
     def store_tweet(self, tweet: Tweet) -> None:
