@@ -8,5 +8,5 @@ The whole setup consists of:
 - a computer for streaming (can be the same system) - Linux
 - the python scripts in this repository
 - OBS
-- an arduino connected to some bright white ledstrip
+- (optional) an arduino connected to some bright white ledstrip
 - a big stack of continuous stationery
